@@ -1,0 +1,28 @@
+{
+    "num_epochs": 50,
+    "batch_size": 8,
+    "gpu": true,
+    "gpu_number": 0,
+    "lr": 0.001,
+    "train_ratio": 0.1,
+    "embedding_path": "../ToxicitySarcasmClassification/glove.42B.300d.txt",
+    "train_data": "final_data_dogs.pkl",
+    "save_model": "models/CharLSTM_",
+    "log_dir": "logs/",
+    "log_name": "CharLSTM_Torch_",
+    "print": true,
+    "print_after": 1,
+    "validate_after":1,
+    "save_after":1,
+    "seed": 7,
+    "word_cell_size": 600,
+    "char_cell_size": 256,
+    "word_num_layers": 1,
+    "char_num_layers": 1,
+    "word_sentence_length": 150,
+    "char_sentence_length": 100,
+    "word_cell_type": "LSTM",
+    "char_cell_type": "LSTM",
+    "vocab_size": 160000
+}
+
