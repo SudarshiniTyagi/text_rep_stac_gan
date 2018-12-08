@@ -47,10 +47,10 @@ class CharEmbeddings:
             chars = chars[:char_sentence_length]
             original_length = char_sentence_length
         chars = [START_CHAR] + chars + [END_CHAR]
-        return chars
+        return chars, original_length
 
 
     def convert_to_tokens(self, sentence, sentence_length):
 
-        sentence = self.clip_or_pad(sentence, sentence_length)
-        return np.array([self.look_up_char(char) for char in sentence], dtype=np.long),
+        sentence, original_length = self.clip_or_pad(sentence, sentence_length)
+        return np.array([self.look_up_char(char) for char in sentence], dtype=np.long), original_length

@@ -17,6 +17,7 @@ class DataLoader(data.Dataset):
 
     def __getitem__(self, idx):
         (img, caption) = self.final_data[self.offset + idx]
-        return (img, self.embedding.convert_to_tokens(caption, self.sentence_length))
+        tokens, original_length = self.embedding.convert_to_tokens(caption, self.sentence_length)
+        return (img, tokens, original_length)
 
 

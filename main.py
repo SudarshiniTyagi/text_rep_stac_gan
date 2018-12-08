@@ -123,8 +123,8 @@ logging.info(args)
 
 def train():
     char_embedding = CharEmbeddings()
-    train_dataset = DataLoader(args.train_data, 0, args.train_ratio, char_embedding, 200)
-    val_dataset = DataLoader(args.train_data, args.train_ratio, 1-args.train_ratio, char_embedding, 200)
+    train_dataset = DataLoader(args.train_data, 0, args.train_ratio, char_embedding, args.char_sentence_length)
+    val_dataset = DataLoader(args.train_data, args.train_ratio, 1-args.train_ratio, char_embedding, args.char_sentence_length)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True,
                                                num_workers = 0)
@@ -137,13 +137,13 @@ def train():
     gpu = torch.cuda.device_count() >= 1 and args.gpu
 
     trainer = Trainer(args.lr, args.batch_size, char_embedding.embedding, args.char_cell_size, args.char_num_layers,
-                      False, gpu, args.gpu_number, True, 0.5)
+                      args.char_sentence_length, False, gpu, args.gpu_number, True, 0.5)
 
 
     for epoch in range(1, args.num_epochs):
         epoch_loss = 0
-        for idx, (images, captions) in enumerate(train_loader):
-            batch_loss = trainer.fit(images, captions)
+        for idx, (images, captions, original_length) in enumerate(train_loader):
+            batch_loss = trainer.fit(images, captions, original_length)
             logging.info("Epoch {} Batch {} Loss : {}".format(epoch, idx, batch_loss))
             epoch_loss += batch_loss
 
