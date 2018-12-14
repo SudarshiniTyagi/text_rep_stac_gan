@@ -16,9 +16,9 @@ class RNN_LSTM(nn.Module):
         super(RNN_LSTM, self).__init__()
 
         self.batch_size = batch_size
-        self.char_embeddings = nn.Embedding(embedding.shape[0], embedding.shape[1])
-        self.char_embeddings.load_state_dict({'weight': torch.from_numpy(embedding)})
-        self.char_embeddings.weight.requires_grad = False
+        self.embeddings = nn.Embedding(embedding.shape[0], embedding.shape[1])
+        self.embeddings.load_state_dict({'weight': torch.from_numpy(embedding)})
+        self.embeddings.weight.requires_grad = False
 
         self.lstm = nn.LSTM(embedding.shape[1], cell_size,
                             num_layers=num_layers, bidirectional=bidirectional, batch_first=batch_first,
@@ -28,7 +28,7 @@ class RNN_LSTM(nn.Module):
         self.batch_size = batch_size
 
     def forward(self, hidden_state, cell_state, captions):
-        embeds = self.char_embeddings(captions)
+        embeds = self.embeddings(captions)
         outputs, (hidden_state, cell_state) = self.lstm(embeds, (hidden_state, cell_state))
         return outputs, (hidden_state, cell_state)
 
@@ -42,10 +42,12 @@ class Vanilla_Text_Encoder(nn.Module):
 
         super(Vanilla_Text_Encoder, self).__init__()
 
-        self.c_dim = 256
+        self.c_dim = cell_size
 
         self.cnn = models.resnet18()
-        self.cnn.fc = Identity()
+        self.cnn.fc = nn.Sequential(
+            nn.Linear(512, cell_size * 2, bias=False),
+            nn.ReLU())
 
         self.rnn = RNN_LSTM(batch_size, embedding, cell_size, num_layers, bidirectional, batch_first,
                  dropout_probability)
@@ -86,7 +88,8 @@ class Vanilla_Text_Encoder(nn.Module):
 
         predictions = None
 
-        outputs = outputs.permute(1,0,2)
+        batch_size, sent_len, num_features = outputs.shape
+        outputs = outputs.contiguous().view(sent_len, batch_size, num_features)
 
         for output in outputs:
             if predictions is None:

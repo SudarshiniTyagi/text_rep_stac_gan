@@ -4,10 +4,17 @@ import logging
 import random
 import sys
 from datetime import datetime
+import pickle
+
+from nltk import word_tokenize
+
 from data_loader import DataLoader
 from char_embeddings import CharEmbeddings
+from word_embeddings import WordEmbeddings
 import torch
 from trainer import Trainer
+from collections import Counter
+import operator
 
 with open("config.json", 'r') as file:
     config = json.load(file)
@@ -43,6 +50,9 @@ parser.add_argument('--train_ratio', type=float, default=config['train_ratio'],
 parser.add_argument('--embedding_path', default=config['embedding_path'], type=str,
                     help='path to embeddings')
 
+parser.add_argument('--word_embedding_pickle_path', default=config['word_embedding_pickle_path'], type=str,
+                    help='path to pickled word embeddings')
+
 parser.add_argument('--train_data', default=config['train_data'], type=str,
                     help='path to train data')
 
@@ -68,6 +78,11 @@ parser.add_argument('--save_after', default=config['save_after'], type=int,
 
 parser.add_argument('--print', action='store_true', default=config['print'],
                     help='Print Log Output to stdout')
+
+# Embedding Type
+parser.add_argument('--embedding_type', type=str, default=config['embedding_type'],
+                    help='Word or Char level embeddings')
+
 
 # Word Level Configs
 
@@ -120,13 +135,24 @@ if args.print:
 logging.info(args)
 
 
-
 def train():
-    char_embedding = CharEmbeddings()
-    train_dataset = DataLoader(args.train_data, 0, args.train_ratio, char_embedding, args.char_sentence_length)
-    val_dataset = DataLoader(args.train_data, args.train_ratio, 1-args.train_ratio, char_embedding, args.char_sentence_length)
+    embedding = None
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size = args.batch_size, shuffle = True,
+    if args.embedding_type == "word":
+        reduced_embeddings_file_object = open(args.word_embedding_pickle_path, 'rb')
+        reduced_embeddings = pickle.load(reduced_embeddings_file_object)
+        train_dataset = DataLoader(args.train_data, 0, args.train_ratio, reduced_embeddings, args.word_sentence_length)
+        val_dataset = DataLoader(args.train_data, args.train_ratio, 1 - args.train_ratio, reduced_embeddings,
+                                 args.word_sentence_length)
+
+    elif args.embedding_type == "char":
+        embedding = CharEmbeddings()
+        train_dataset = DataLoader(args.train_data, 0, args.train_ratio, embedding, args.char_sentence_length)
+        val_dataset = DataLoader(args.train_data, args.train_ratio, 1 - args.train_ratio, embedding,
+                                 args.char_sentence_length)
+
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size = args.batch_size, shuffle=True,
                                                num_workers = 0)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True,
                                                num_workers=0)
@@ -136,9 +162,12 @@ def train():
 
     gpu = torch.cuda.device_count() >= 1 and args.gpu
 
-    trainer = Trainer(args.lr, args.batch_size, char_embedding.embedding, args.char_cell_size, args.char_num_layers,
-                      args.char_sentence_length, False, gpu, args.gpu_number, True, 0.5)
-
+    if args.embedding_type == "word":
+        trainer = Trainer(args.lr, args.batch_size, reduced_embeddings.glove, args.word_cell_size, args.word_num_layers,
+                          args.word_sentence_length, False, gpu, args.gpu_number, True, 0.5)
+    elif args.embedding_type == "char":
+        trainer = Trainer(args.lr, args.batch_size, embedding.embedding, args.char_cell_size, args.char_num_layers,
+                          args.char_sentence_length, False, gpu, args.gpu_number, True, 0.5)
 
     for epoch in range(1, args.num_epochs):
         epoch_loss = 0
@@ -151,6 +180,7 @@ def train():
         logging.info("For Train, overall loss for epoch {} = {}".format(epoch, epoch_loss))
 
         #TODO write Eval
+
 
 
 if __name__ == "__main__":

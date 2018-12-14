@@ -1,19 +1,19 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-from torch.autograd import Variable
+
 from models import Vanilla_Text_Encoder
-import numpy as np
 
 
 class Trainer:
     def __init__(self, lr, batch_size, embedding, cell_size, num_layers, sentence_length, bidirectional, GPU, \
-                                                                                        gpu_number, batch_first
-    = True, dropout_probability = 0.5):
+                 gpu_number, batch_first
+                 =True, dropout_probability=0.5):
 
-        self.model = Vanilla_Text_Encoder(batch_size, embedding, cell_size, num_layers, bidirectional, GPU, gpu_number, batch_first,
-                 dropout_probability)
+        self.model = Vanilla_Text_Encoder(batch_size, embedding, cell_size, num_layers, bidirectional, GPU, gpu_number,
+                                          batch_first,
+                                          dropout_probability)
 
         self.GPU = GPU
         self.gpu_number = gpu_number
@@ -24,12 +24,10 @@ class Trainer:
 
     def sentence_mask(self, original_length_sentence):
         if (original_length_sentence < self.sentence_length):
-            mask = [1] * (original_length_sentence+1) + [0] * (self.sentence_length - original_length_sentence)
+            mask = [1] * (original_length_sentence + 1) + [0] * (self.sentence_length - original_length_sentence)
         else:
             mask = [1] * (self.sentence_length + 1)
         return mask
-
-
 
     def loss(self, predictions, captions, original_length):
         mask = []
@@ -39,9 +37,10 @@ class Trainer:
         if self.GPU:
             mask = mask.cuda(self.gpu_number)
         loss = 0
-        predictions = predictions.permute(1,0,2)
-        captions = captions.permute(1,0)
-        mask = mask.permute(1,0)
+        batch_size, sent_len, num_features = predictions.shape
+        predictions = predictions.view(sent_len, batch_size, num_features)
+        captions = captions.view(-1, batch_size)
+        mask = mask.view(-1, batch_size)
 
         captions = captions[1:]
         predictions = predictions[:-1]

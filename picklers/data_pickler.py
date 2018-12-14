@@ -32,7 +32,7 @@ for i, img in enumerate(images):
 
     print("Done: %v/%v".format(i, len(images)))
 
-file_name_dogs = "final_data_dogs.pkl"
+file_name_dogs = "final_data_dogs_224.pkl"
 
 # open the file for writing
 fileObject = open(file_name_dogs, 'wb')

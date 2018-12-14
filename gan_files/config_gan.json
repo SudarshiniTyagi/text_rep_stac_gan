@@ -1,0 +1,41 @@
+{
+  "generator":{
+    "lr": 0.001
+  },
+  "discriminator":{
+    "lr": 0.001
+  },
+  "rnn": {
+    "lr": 0.001,
+    "word_cell_size": 600,
+    "word_num_layers": 1,
+    "word_cell_type": "LSTM",
+    "vocab_size": 160000,
+
+    "char_cell_size": 256,
+    "char_num_layers": 1,
+    "char_cell_type": "LSTM"
+
+  },
+  "num_epochs": 50,
+  "batch_size": 8,
+  "seed": 7,
+  "train_ratio": 0.1,
+
+  "gpu": true,
+  "gpu_number": 0,
+
+  "embedding_path": "../ToxicitySarcasmClassification/glove.42B.300d.txt",
+  "train_data": "final_data_dogs_64.pkl",
+  "save_model": "models/GAN/stack-gan-1_",
+  "log_dir": "logs/",
+  "log_name": "stack-gan-1_",
+
+  "print": true,
+  "print_after": 1,
+  "validate_after": 1,
+  "save_after": 1,
+
+  "word_sentence_length": 150,
+  "char_sentence_length": 100
+}
