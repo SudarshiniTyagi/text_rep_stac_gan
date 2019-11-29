@@ -5,5 +5,5 @@ Full project report can be found here.
 
 ## Main architecture
 
-![alt text](https://drive.google.com/file/d/1mJFqWmYiBRt589u7eZM2hPOTnewZYF5l/view?usp=sharing)
+![alt text](MainArchitecture.png?raw=true "Title")
 
