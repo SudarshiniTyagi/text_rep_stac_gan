@@ -1,4 +1,4 @@
-### Collborator
+### Collaborator
 [Rajat Agarwal](https://github.com/ra2630)
 
 ## Abstract
