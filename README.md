@@ -4,6 +4,6 @@ In this paper, we propose an end-to-end model for generating encoding vectors fo
 Full project report can be found here.
 
 ## Main architecture
-
+In this paper, we propose an end-to-end hybrid CNN-RNN model to learn the relation between an image and its text description. The learned model is then used to train Stack GAN conditioned on an input caption, whose encodings are generated from our trained model.
 ![alt text](MainArchitecture.png?raw=true "Title")
 
